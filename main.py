@@ -11,7 +11,7 @@ cloudflare['description'] = "Cloudflare IPv4 and IPv6"
 cloudflare['url'] = [
     "https://www.cloudflare.com/ips-v4", "https://www.cloudflare.com/ips-v6"
 ]
-cloudflare['id'] = uuid.uuid4().urn.split(':')[2]
+cloudflare['id'] = str(uuid.uuid4())
 cloudflare['regex'] = "^(\d+.*\d+)$"
 
 akamai = {}
@@ -20,7 +20,7 @@ akamai['description'] = "Akamai IPv4 and IPv6"
 akamai['url'] = [
     "https://learn.akamai.com/en-us/webhelp/origin-ip-acl/origin-ip-acl-guide/GUID-E5AD1B2B-BDA1-4C3F-87DE-B0CDBDD1E1B0.html"
 ]
-akamai['id'] = uuid.uuid4().urn.split(':')[2]
+akamai['id'] = str(uuid.uuid4())
 akamai['regex'] = "^\s+<td[^>]+>(\d.*\d)<\/td>$"
 
 gdc = {}
