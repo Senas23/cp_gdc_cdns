@@ -17,10 +17,6 @@ Check Point R81+
 ## Instructions
 ### Direct Use
 Use raw `cdns.json` right into your GenericDataCenter object and use objects as `tags`
-```
- export AWS_ACCESS_KEY='<API ACCESS KEY>'
- export AWS_SECRET_KEY='<API SECRET KEY>'
-```
 
 ### Clone Repo
 Clone repo without `cdns.json` file
