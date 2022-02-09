@@ -32,6 +32,7 @@ git clone https://github.com/Senas23/cp_gdc_cdns.git
 Create repo secrets for the workflow under Settings -> Secrets -> Actions
 
 `GH_USER` - Your GitHub account's username
+
 `GH_MAIL` - Your GitHub account's email
 
 
