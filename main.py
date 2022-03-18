@@ -44,9 +44,11 @@ def get_cdn(url: list, reg: re) -> list:
         except (NewConnectionError, ConnectionError, MaxRetryError,
                 RequestException) as e:
             logging.error(f"[*] Connection exception in get_cdn() for {item}")
+            exit(1)
         except Exception as e:
             logging.error(
                 f"[*] General Error exception in get_cdn() for {item}")
+            exit(1)
     return reg_result
 
 
