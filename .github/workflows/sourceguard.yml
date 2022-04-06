@@ -2,6 +2,7 @@ name: SourceGuard Code Analysis
 on: [push]
 jobs:
   code-analysis:
+    environment: sourceguard
     runs-on: ubuntu-latest
     container:
       image: sourceguard/sourceguard-cli
