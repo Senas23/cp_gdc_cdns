@@ -45,7 +45,7 @@ Create repo secrets for the workflow under Settings -> Secrets -> Actions
 `GH_MAIL` - Your GitHub account's email
 
 ## Run
-Nothing needs to be done, as the GitHub Actions workflow runs on a schedule of 5 minutes.
+Nothing needs to be done, as the GitHub Actions workflow runs on a schedule of 15 minutes.
 You can also clone the repo and run `python3 main.py` on your local system as a cronjob to generate `cdns.json` file.
 
 ## Development Environment
