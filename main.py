@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import requests, re, json, logging, uuid, os
+import requests, re, json, logging, uuid, os, random
 from requests.exceptions import RequestException
 from urllib3.exceptions import InsecureRequestWarning, MaxRetryError, NewConnectionError
 
@@ -13,32 +13,41 @@ cloudflare['url'] = [
 ]
 cloudflare['id'] = str(uuid.uuid4())
 cloudflare['regex'] = "^(\d+.*\d+)$"
+cloudflare['match_group'] = 1
 
 akamai = {}
 akamai['name'] = "Akamai"
 akamai['description'] = "Akamai IPv4 and IPv6"
 akamai['url'] = [
-    "https://learn.akamai.com/en-us/webhelp/origin-ip-acl/origin-ip-acl-guide/GUID-E5AD1B2B-BDA1-4C3F-87DE-B0CDBDD1E1B0.html"
+    "https://techdocs.akamai.com/property-mgr/docs/origin-ip-access-control"
 ]
 akamai['id'] = str(uuid.uuid4())
-akamai['regex'] = "^\s+<td[^>]+>(\d.*\d)<\/td>$"
+akamai['regex'] = "(^|\>)(\d.*?\/\d{1,2})\<"
+akamai['match_group'] = 2
 
 gdc = {}
 gdc['description'] = "CDNs"
 gdc['file'] = "cdns.json"
 
+user_agent_list = [
+'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
+'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
+'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0',
+'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+]
 
-def get_cdn(url: list, reg: re) -> list:
+def get_cdn(url: list, reg: re, match_group: int) -> list:
     reg_result = []
     for item in url:
         try:
-            res = requests.get(item, verify=False)
+            logging.warning(f'[*] Request for: {item}')
+            headers = {'User-Agent': random.choice(user_agent_list)}
+            res = requests.get(item, verify=False, timeout=30, headers=headers)
             if res.status_code == 200:
-                response = res.text.splitlines()
-                for line in response:
-                    if re.match(reg, line, re.IGNORECASE):
-                        reg_result.append(
-                            re.match(reg, line, re.IGNORECASE).group(1))
+                for line in res.text.splitlines():
+                  for match in re.finditer(reg, line, re.IGNORECASE):
+                    reg_result.append(match.group(match_group))
             else:
                 logging.warning(f"[*] Could not fetch from {item}")
         except (NewConnectionError, ConnectionError, MaxRetryError,
@@ -46,8 +55,7 @@ def get_cdn(url: list, reg: re) -> list:
             logging.error(f"[*] Connection exception in get_cdn() for {item}")
             exit(1)
         except Exception as e:
-            logging.error(
-                f"[*] General Error exception in get_cdn() for {item}")
+            logging.error(f"[*] General Error exception in get_cdn() for {item}")
             exit(1)
     return reg_result
 
@@ -82,8 +90,8 @@ def update_uuid():
 
 def main():
     update_uuid()
-    cloudflare_list = get_cdn(cloudflare["url"], cloudflare["regex"])
-    akamai_list = get_cdn(akamai["url"], akamai['regex'])
+    cloudflare_list = get_cdn(cloudflare["url"], cloudflare["regex"], cloudflare["match_group"])
+    akamai_list = get_cdn(akamai["url"], akamai['regex'], akamai["match_group"])
 
     gdc_file = {
         "version": "1.0",

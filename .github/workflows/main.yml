@@ -6,13 +6,15 @@ name: cp_create_generic_data_center
 on:
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron:  '15 * * * *'
+    - cron: "15 * * * *"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  # Set timeout for the entire job
+  timeout-minutes: 3
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
@@ -32,7 +34,7 @@ jobs:
         run: pip install requests
       - name: execute main.py script # run the run.py to get the latest data
         run: python main.py
-        
+
       - name: Commit cdns.json back to repo
         run: |
           git config --global user.name ${{ secrets.GH_USER }}
