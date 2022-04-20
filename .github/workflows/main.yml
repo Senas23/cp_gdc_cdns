@@ -31,8 +31,8 @@ jobs:
         with:
           python-version: 3.6 #install the python needed
           architecture: x64
-      - name: install requests
-        run: pip install requests
+      - name: install requirements
+        run: pip install -r requirements.txt
       - name: execute main.py script # run the run.py to get the latest data
         run: python main.py
 

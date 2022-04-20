@@ -1,0 +1,14 @@
+- name: "Cloudflare"
+  description: "Cloudflare IPv4 and IPv6"
+  url:
+    - "https://www.cloudflare.com/ips-v4"
+    - "https://www.cloudflare.com/ips-v6"
+  regex: "^(\\d+.*\\d+)$"
+  match_group: 1
+
+- name: "Akamai"
+  description: "Akamai IPv4 and IPv6"
+  url:
+    - "https://techdocs.akamai.com/property-mgr/docs/origin-ip-access-control"
+  regex: "(^|\\>)(\\d.*?\/\\d{1,2})\\<"
+  match_group: 2

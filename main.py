@@ -1,29 +1,9 @@
 #!/usr/bin/env python3
-import requests, re, json, logging, uuid, os, random
+import requests, re, json, logging, uuid, os, random, yaml
 from requests.exceptions import RequestException
 from urllib3.exceptions import InsecureRequestWarning, MaxRetryError, NewConnectionError
 
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
-
-cloudflare = {}
-cloudflare['name'] = "Cloudflare"
-cloudflare['description'] = "Cloudflare IPv4 and IPv6"
-cloudflare['url'] = [
-    "https://www.cloudflare.com/ips-v4", "https://www.cloudflare.com/ips-v6"
-]
-cloudflare['id'] = str(uuid.uuid4())
-cloudflare['regex'] = "^(\d+.*\d+)$"
-cloudflare['match_group'] = 1
-
-akamai = {}
-akamai['name'] = "Akamai"
-akamai['description'] = "Akamai IPv4 and IPv6"
-akamai['url'] = [
-    "https://techdocs.akamai.com/property-mgr/docs/origin-ip-access-control"
-]
-akamai['id'] = str(uuid.uuid4())
-akamai['regex'] = "(^|\>)(\d.*?\/\d{1,2})\<"
-akamai['match_group'] = 2
 
 gdc = {}
 gdc['description'] = "CDNs"
@@ -70,44 +50,49 @@ def gdc_create_object(name: str, uuid: str, description: str,
     }
 
 
-def update_uuid():
-    file = {}
+def update_uuid(cdns: list) -> list:
     try:
+        for cdn in cdns:
+          cdn['id'] = str(uuid.uuid4())
+
         if os.path.isfile(gdc["file"]):
             with open(gdc["file"], 'r') as f:
                 file = json.load(f)
 
-            for item in file['objects']:
-                if item['name'] == cloudflare['name']:
-                    cloudflare['id'] = item['id']
-                elif item['name'] == akamai['name']:
-                    akamai['id'] = item['id']
+                for item in file['objects']:
+                    for cdn in cdns:
+                      if item['name'] == cdn['name']:
+                          cdn['id'] = item['id']
     except Exception as e:
         raise e
-        exit(1)
-    return
+    return cdns
 
+def generate_genericdatacenter():
+  return
 
+def generate_networkfeed():
+  return
+  
 def main():
-    update_uuid()
-    cloudflare_list = get_cdn(cloudflare["url"], cloudflare["regex"], cloudflare["match_group"])
-    akamai_list = get_cdn(akamai["url"], akamai['regex'], akamai["match_group"])
+    cdns = []
+    try:
+      with open('input.yaml', 'r') as f:
+        cdns = update_uuid(yaml.safe_load(f))
+    except Exception as e:
+      raise e
 
     gdc_file = {
         "version": "1.0",
         "description": gdc["description"],
         "objects": []
     }
-    gdc_file["objects"].append(
-        gdc_create_object(name=cloudflare["name"],
-                          uuid=cloudflare["id"],
-                          description=cloudflare["description"],
-                          ranges=cloudflare_list))
-    gdc_file["objects"].append(
-        gdc_create_object(name=akamai["name"],
-                          uuid=akamai["id"],
-                          description=akamai["description"],
-                          ranges=akamai_list))
+    for cdn in cdns:
+      cdn_ips = get_cdn(cdn["url"], cdn["regex"], cdn["match_group"])
+      gdc_file["objects"].append(
+          gdc_create_object(name=cdn["name"],
+                            uuid=cdn["id"],
+                            description=cdn["description"],
+                            ranges=cdn_ips))
     with open(gdc["file"], 'w') as f:
         json.dump(gdc_file, f, indent=2)
     return
