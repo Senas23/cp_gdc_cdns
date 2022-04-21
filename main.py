@@ -24,7 +24,7 @@ def get_cdn(url: list, reg: re, match_group: int) -> list:
         try:
             logging.warning(f'[*] Request for: {item}')
             headers = {'User-Agent': random.choice(user_agent_list)}
-            res = requests.get(item, verify=False, timeout=30, headers=headers)
+            res = requests.get(item, verify=True, timeout=30, headers=headers)
             if res.status_code == 200:
                 for line in res.text.splitlines():
                   for match in re.finditer(reg, line, re.IGNORECASE):
