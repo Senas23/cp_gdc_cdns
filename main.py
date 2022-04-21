@@ -8,7 +8,7 @@ requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 gdc = {}
 gdc['description'] = "CDNs"
-gdc['file'] = "gdc_cdns.json"
+gdc['file'] = "cdns.json"
 
 user_agent_list = [
 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
