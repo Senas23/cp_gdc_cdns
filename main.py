@@ -78,7 +78,7 @@ def update_uuid(cdns: list):
 def main():
     cdns = []
     try:
-      with open('input.yaml', 'r') as f:
+      with open('inputs.cdnql', 'r') as f:
         cdns, previous_cdns_output = update_uuid(yaml.safe_load(f))
     except Exception as e:
       raise e
