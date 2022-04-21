@@ -5,7 +5,7 @@ jobs:
     environment: sourceguard
     runs-on: ubuntu-latest
     container:
-      image: sourceguard/sourceguard-cli:v0.0.251
+      image: sourceguard/sourceguard-cli
     steps:
       - name: Scan
         uses: CheckPointSW/sourceguard-action@main
