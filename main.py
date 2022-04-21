@@ -18,6 +18,16 @@ user_agent_list = [
 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
 ]
 
+def parse_results(reg: re, match_group: int, results: list) -> list:
+  tmp_result = []
+  for line in results:
+    for match in re.finditer(reg, line, re.IGNORECASE):
+      # Validate Network
+      network = ip_network(match.group(match_group))
+      tmp_result.append(str(network))
+  return tmp_result
+
+
 def get_cdn(url: list, reg: re, match_group: int) -> list:
     reg_result = []
     for item in url:
@@ -26,21 +36,17 @@ def get_cdn(url: list, reg: re, match_group: int) -> list:
             headers = {'User-Agent': random.choice(user_agent_list)}
             res = requests.get(item, verify=True, timeout=30, headers=headers)
             if res.status_code == 200:
-                for line in res.text.splitlines():
-                  for match in re.finditer(reg, line, re.IGNORECASE):
-                    # Validate Network
-                    network = ip_network(match.group(match_group))
-                    reg_result.append(str(network))
+                reg_result = parse_results(reg, match_group, res.text.splitlines())
             else:
                 logging.warning(f"[*] Could not fetch from {item}")
         except (NewConnectionError, ConnectionError, MaxRetryError,
-                RequestException) as e:
+                RequestException):
             logging.error(f"[*] Connection exception in get_cdn() for {item}")
             exit(1)
-        except (ValueError) as e:
+        except (ValueError):
             logging.error(f"[*] Invalid network found in get_cdn() for {item}")
             exit(1)
-        except Exception as e:
+        except Exception:
             logging.error(f"[*] General Error exception in get_cdn() for {item}")
             exit(1)
     return reg_result
@@ -58,30 +64,24 @@ def create_json_object(name: str, uuid: str, description: str,
 
 def update_uuid(cdns: list):
     file = {}
-    try:
-        for cdn in cdns:
-          cdn['id'] = str(uuid.uuid4())
+    for cdn in cdns:
+      cdn['id'] = str(uuid.uuid4())
 
-        if os.path.isfile(gdc["file"]):
-            with open(gdc["file"], 'r') as f:
-                file = json.load(f)
+    if os.path.isfile(gdc["file"]):
+        with open(gdc["file"], 'r') as f:
+            file = json.load(f)
 
-                for item in file['objects']:
-                    for cdn in cdns:
-                      if item['name'] == cdn['name']:
-                          cdn['id'] = item['id']
-    except Exception as e:
-        raise e
+            for item in file['objects']:
+                for cdn in cdns:
+                  if item['name'] == cdn['name']:
+                      cdn['id'] = item['id']
     return cdns, file
 
 
 def main():
     cdns = []
-    try:
-      with open('inputs.cdnql', 'r') as f:
-        cdns, previous_cdns_output = update_uuid(yaml.safe_load(f))
-    except Exception as e:
-      raise e
+    with open('inputs.cdnql', 'r') as f:
+      cdns, previous_cdns_output = update_uuid(yaml.safe_load(f))
 
     gdc_file = {
         "version": "1.0",
@@ -99,7 +99,6 @@ def main():
     if gdc_file != previous_cdns_output:
       with open(gdc["file"], 'w') as f:
           json.dump(gdc_file, f, indent=2)
-    return
 
 
 if __name__ == "__main__":
