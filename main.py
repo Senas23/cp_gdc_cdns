@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import requests, re, json, logging, uuid, os, random, yaml
+from ipaddress import ip_network
 from requests.exceptions import RequestException
 from urllib3.exceptions import InsecureRequestWarning, MaxRetryError, NewConnectionError
 
@@ -7,7 +8,7 @@ requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 gdc = {}
 gdc['description'] = "CDNs"
-gdc['file'] = "cdns.json"
+gdc['file'] = "gdc_cdns.json"
 
 user_agent_list = [
 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
@@ -27,12 +28,17 @@ def get_cdn(url: list, reg: re, match_group: int) -> list:
             if res.status_code == 200:
                 for line in res.text.splitlines():
                   for match in re.finditer(reg, line, re.IGNORECASE):
-                    reg_result.append(match.group(match_group))
+                    # Validate Network
+                    network = ip_network(match.group(match_group))
+                    reg_result.append(str(network))
             else:
                 logging.warning(f"[*] Could not fetch from {item}")
         except (NewConnectionError, ConnectionError, MaxRetryError,
                 RequestException) as e:
             logging.error(f"[*] Connection exception in get_cdn() for {item}")
+            exit(1)
+        except (ValueError) as e:
+            logging.error(f"[*] Invalid network found in get_cdn() for {item}")
             exit(1)
         except Exception as e:
             logging.error(f"[*] General Error exception in get_cdn() for {item}")
@@ -40,7 +46,7 @@ def get_cdn(url: list, reg: re, match_group: int) -> list:
     return reg_result
 
 
-def gdc_create_object(name: str, uuid: str, description: str,
+def create_json_object(name: str, uuid: str, description: str,
                       ranges: list) -> dict:
     return {
         "name": name,
@@ -50,7 +56,8 @@ def gdc_create_object(name: str, uuid: str, description: str,
     }
 
 
-def update_uuid(cdns: list) -> list:
+def update_uuid(cdns: list):
+    file = {}
     try:
         for cdn in cdns:
           cdn['id'] = str(uuid.uuid4())
@@ -65,19 +72,14 @@ def update_uuid(cdns: list) -> list:
                           cdn['id'] = item['id']
     except Exception as e:
         raise e
-    return cdns
+    return cdns, file
 
-def generate_genericdatacenter():
-  return
 
-def generate_networkfeed():
-  return
-  
 def main():
     cdns = []
     try:
       with open('input.yaml', 'r') as f:
-        cdns = update_uuid(yaml.safe_load(f))
+        cdns, previous_cdns_output = update_uuid(yaml.safe_load(f))
     except Exception as e:
       raise e
 
@@ -89,12 +91,14 @@ def main():
     for cdn in cdns:
       cdn_ips = get_cdn(cdn["url"], cdn["regex"], cdn["match_group"])
       gdc_file["objects"].append(
-          gdc_create_object(name=cdn["name"],
+          create_json_object(name=cdn["name"],
                             uuid=cdn["id"],
                             description=cdn["description"],
                             ranges=cdn_ips))
-    with open(gdc["file"], 'w') as f:
-        json.dump(gdc_file, f, indent=2)
+    
+    if gdc_file != previous_cdns_output:
+      with open(gdc["file"], 'w') as f:
+          json.dump(gdc_file, f, indent=2)
     return
 
 
