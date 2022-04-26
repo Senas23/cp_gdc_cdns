@@ -36,7 +36,7 @@ def get_cdn(url: list, reg: re, match_group: int) -> list:
             headers = {'User-Agent': random.choice(user_agent_list)}
             res = requests.get(item, verify=True, timeout=30, headers=headers)
             if res.status_code == 200:
-                reg_result = parse_results(reg, match_group, res.text.splitlines())
+                reg_result.extend(parse_results(reg, match_group, res.text.splitlines()))
             else:
                 logging.warning(f"[*] Could not fetch from {item}")
         except (NewConnectionError, ConnectionError, MaxRetryError,
