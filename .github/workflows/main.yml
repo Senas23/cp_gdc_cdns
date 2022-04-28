@@ -41,7 +41,8 @@ jobs:
           git config --global user.name ${{ secrets.GH_USER }}
           git config --global user.email "${{ secrets.GH_MAIL }}"
           git add cdns.json
+          git add dynamic_objects.txt
           if ! git diff-index --quiet HEAD; then
-            git commit -m "Create/Update cdns.json"
+            git commit -m "Create/Update outputs"
             git push
           fi

@@ -88,17 +88,28 @@ def main():
         "description": gdc["description"],
         "objects": []
     }
+
+    dyn_obj_list = []
     for cdn in cdns:
       cdn_ips = get_cdn(cdn["url"], cdn["regex"], cdn["match_group"])
+      
+      dyn_obj = f"dynamic_objects -u {cdn['name']} -r"
+      for network in cdn_ips:
+        dyn_obj += f" {str(ip_network(network).network_address)} {str(ip_network(network).broadcast_address)}"
+      dyn_obj_list.append(dyn_obj)
+      
       gdc_file["objects"].append(
           create_json_object(name=cdn["name"],
                             uuid=cdn["id"],
                             description=cdn["description"],
                             ranges=cdn_ips))
-    
+
     if gdc_file != previous_cdns_output:
       with open(gdc["file"], 'w') as f:
           json.dump(gdc_file, f, indent=2)
+    
+    with open('dynamic_objects.txt', 'w') as f:
+      f.write('\n'.join(dyn_obj_list))
 
 
 if __name__ == "__main__":
