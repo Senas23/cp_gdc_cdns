@@ -9,6 +9,8 @@ Parse IPv4 and IPv6 addresses from various CDNs (`Cloudflare` and `Akamai`) into
 
 `cdns.json` - JSON file formated for Check Point's GenericDataCenter object. R81+ is required. See `sk167210`
 
+`dynamic_objects.txt` - Dynamic Object file that can be used for Dynamic Objects in R77+. See `skI1915`
+
 `requirements.txt` - Python3 PIP requirements file
 
 `.github/workflows/main.py` - GitHub Actions workflow of running Python code and create/update `cdns.json`
@@ -63,6 +65,12 @@ MGMT_CLI
 mgmt_cli add network-feed name "nf_Cloudflare" feed-url "https://raw.githubusercontent.com/Senas23/cp_gdc_cdns/main/cdns.json" json-query ".objects[] | select(.name == "Cloudflare" ) | .ranges[]" feed-format "JSON" feed-type "IP Address" update-interval 60 -f json
 ```
 
+#### Add Dynamic Objects
+Create a Dynamic Object on the MGMT/Domain, use the object in a rule, and create the Dynamic Objects on the GW in question:
+```
+dynamic_objects -f <PATH TO>/dynamic_objects.txt
+```
+
 #### Fork Repo
 Fork repo and delete existing `cdns.json` file
 
@@ -75,7 +83,7 @@ Create repo secrets for the workflow under Settings -> Secrets -> Actions
 
 #### Run
 Nothing needs to be done, as the GitHub Actions workflow runs on a schedule of 15 minutes.
-You can also clone the repo and run `python3 main.py` on your local system as a cronjob to generate `cdns.json` file.
+You can also clone the repo and run `python3 main.py` on your local system as a cronjob to generate `cdns.json` and `dynamic_objects.txt` file.
 
 ## Local Use
 Clone repo and delete existing `cdns.json` file
