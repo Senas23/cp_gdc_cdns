@@ -10,6 +10,5 @@ jobs:
       - name: Scan
         uses: CheckPointSW/sourceguard-action@main
         with:
-          node-version: '16'
           SG_CLIENT_ID: ${{ secrets.SG_CLIENT_ID }}
           SG_SECRET_KEY: ${{ secrets.SG_SECRET_KEY }}
