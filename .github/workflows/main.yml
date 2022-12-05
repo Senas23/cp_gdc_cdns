@@ -25,13 +25,11 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-        with:
-          node-version: '16'
 
-      - name: setup python 3.6
+      - name: setup python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: 3.6 #install the python needed
+          python-version: 3.10 #install the python needed
       - name: install requirements
         run: pip install -r requirements.txt
       - name: execute main.py script # run the run.py to get the latest data
