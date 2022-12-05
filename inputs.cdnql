@@ -9,6 +9,6 @@
 - name: "Akamai"
   description: "Akamai IPv4 and IPv6"
   url:
-    - "https://techdocs.akamai.com/property-mgr/docs/origin-ip-access-control"
-  regex: "(^|\\>)(\\d.*?\/\\d{1,2})\\<"
-  match_group: 2
+    - "https://techdocs.akamai.com/origin-ip-acl/docs/update-your-origin-server"
+  regex: "^(\\d.*?\/\\d{1,2})(\\s{2})?$"
+  match_group: 1
